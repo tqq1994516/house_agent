@@ -1,0 +1,8 @@
+{% load %}
+body {
+    background: url("../img/loginBackground.jpeg") no-repeat;
+}
+
+.login-form-background {
+    background: rgba(169, 169, 169, 0.3);
+}
