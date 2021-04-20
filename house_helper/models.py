@@ -12,7 +12,7 @@ class Users(models.Model):
     true_name = models.CharField(max_length=20, null=True, blank=True, verbose_name='姓名')
     email = models.EmailField(unique=True, verbose_name='邮箱')
     sex = models.IntegerField(choices=GENDER, default=1, verbose_name='性别')
-    mobile_phone = models.IntegerField(unique=True, null=True, blank=True, verbose_name='手机号')
+    mobile_phone = models.BigIntegerField(unique=True, null=True, blank=True, verbose_name='手机号')
     u_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
     c_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')
 

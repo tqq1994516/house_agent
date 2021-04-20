@@ -17,7 +17,10 @@ def login(request):
         login_form = loginForm(request.POST)
         if login_form.is_valid():
             valid_result = login_form.clean()
-            verify_account = Users.objects.filter(username=valid_result['username']).first()
+            if re.search('^\\d', valid_result['username']).group():
+                verify_account = Users.objects.filter(mobile_phone=valid_result['username']).first()
+            else:
+                verify_account = Users.objects.filter(username=valid_result['username']).first()
             if verify_account:
                 verify_password = Users.objects.filter(id=verify_account['id'],
                                                        password=valid_result['password']).first()
@@ -45,10 +48,30 @@ def register(request):
         register_form = registerForm(request.POST)
         if register_form.is_valid():
             valid_result = register_form.clean()
-            print(valid_result)
-            create_result = Users.objects.create(valid_result)
-            print(create_result)
-            msg = success(message='成功', data=valid_result)
+            repeatability_verification_username = Users.objects.filter(username=valid_result['username']).first()
+            repeatability_verification_email = Users.objects.filter(username=valid_result['email']).first()
+            repeatability_verification_mobile_phone = Users.objects.filter(username=valid_result['mobile_phone']).first()
+            if repeatability_verification_username:
+                msg = params_error(message='失败', data={'username': ['账号已存在']})
+            elif repeatability_verification_email:
+                msg = params_error(message='失败', data={'email': ['邮箱已存在']})
+            elif repeatability_verification_mobile_phone:
+                msg = params_error(message='失败', data={'mobile_phone': ['手机号已存在']})
+            elif re.search('^\\d', valid_result['username']).group():
+                msg = params_error(message='失败', data={'username': ['账号不能以数字开头']})
+            elif valid_result['password'] == valid_result['password2']:
+                del valid_result['password2']
+                try:
+                    obj = Users.objects.create(**valid_result)
+                    obj.save()
+                except Exception:
+                    msg = params_error(message='失败', data={'register': ['注册信息表内已存在']})
+                    return HttpResponse(msg)
+                msg = success(message='成功', data={'register': ['注册成功']})
+            elif valid_result['password'] == valid_result['username']:
+                msg = params_error(message='失败', data={'password': ['密码不能与账号一致']})
+            else:
+                msg = params_error(message='失败', data={'password2': ['两次密码不一致']})
         else:
             msg = unauth(message='失败', data=register_form.errors)
     return HttpResponse(msg)
