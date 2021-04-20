@@ -1,7 +1,7 @@
 import re
-
+from django.core import serializers
 from django.shortcuts import render, HttpResponse, redirect
-from .models import Users
+from .models import Users, Menus
 from .form import loginForm, registerForm
 from .restful import success, params_error, server_error, unauth, method_error
 
@@ -79,6 +79,6 @@ def register(request):
 
 def index(request):
     if request.method == 'GET':
-        return render(request, 'index.html')
-    else:
-        pass
+        menu_list = Menus.objects.all()
+        menu_dict = serializers.serialize("json", menu_list)
+        return render(request, 'index.html', {'menu_list': menu_dict})
