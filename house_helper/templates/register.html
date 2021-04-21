@@ -75,8 +75,9 @@
                     if (response.data.code === 200) {
                         icon.attr('src', '{% static 'house_helper/img/icon/suc.png' %}').attr('alt', '成功')
                         msg.text(response.data.data[argumentsKey][0]).prepend(icon)
+                        alert.attr('class', 'alert alert-success col-2 text-center fixed-top align-self-center')
                         alert.fadeIn(100)
-                        alert.delay(3000).fadeOut(300,function () {
+                        alert.delay(1000).fadeOut(300,function () {
                             window.location.href = '{% url 'login' %}'
                         })
                     } else if (argumentsKey) {

@@ -22,10 +22,9 @@ def login(request):
             else:
                 verify_account = Users.objects.filter(username=valid_result['username']).first()
             if verify_account:
-                verify_password = Users.objects.filter(id=verify_account['id'],
-                                                       password=valid_result['password']).first()
-                if verify_password:
-                    return redirect('/login/')
+                verify_password = Users.objects.filter(id=verify_account.id).first()
+                if verify_password.password.__eq__(valid_result['password']):
+                    msg = success(message='成功', data={'login': ['登录成功']})
                 else:
                     msg = unauth(message='失败', data={'password': ['账号输入有误或密码错误']})
             else:
@@ -57,7 +56,7 @@ def register(request):
                 msg = params_error(message='失败', data={'email': ['邮箱已存在']})
             elif repeatability_verification_mobile_phone:
                 msg = params_error(message='失败', data={'mobile_phone': ['手机号已存在']})
-            elif re.search('^\\d', valid_result['username']).group():
+            elif re.search('^\\d', valid_result['username']):
                 msg = params_error(message='失败', data={'username': ['账号不能以数字开头']})
             elif valid_result['password'] == valid_result['password2']:
                 del valid_result['password2']

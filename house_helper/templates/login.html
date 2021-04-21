@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+    <link rel="shortcut icon" type="image/png" href="{% static 'house_helper/img/icon/favicon.ico' %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,6 +17,11 @@
 {% block page-login-form %}
     <div class="container-fluid" style="margin-top: 10%">
         <div class="row d-flex justify-content-center">
+            <div class= "alert alert-danger col-2 text-center fixed-top align-self-center" role = "alert" style = "margin: 30px auto auto auto; display: none;" id = "alert" >
+                <p>
+                    <img src="{% static 'house_helper/img/icon/err.png' %}" style="width: 20px; height: 20px" alt="错误">
+                </p>
+            </div>
             <form class="login-form-background px-3 py-3 col-3" id="form">
                 <h2 class="form-signin-heading text-center" style="color: azure">请登录</h2>
                 {% csrf_token %}
@@ -50,15 +56,23 @@
                 data: $('#form').serialize(),
                 dataType: 'JSON',
             }).then(function (response) {
+                const alert = $('#alert')
+                const icon = $('#alert p img')
+                const msg = $('#alert p')
                 for (const argumentsKey in response.data.data) {
-                    if (argumentsKey) {
-                        const alert = $('<div class="alert alert-danger col-2 text-center fixed-top align-self-center" role="alert" style="margin: 30px auto auto auto;" id="alert"></div>')
-                        const icon = $('<img src="{% static 'house_helper/img/icon/err.png' %}" style="width: 20px; height: 20px" alt="错误">')
-                        const err_msg = $('<p>' + response.data.data[argumentsKey][0] + '</p>')
-                        err_msg.prepend(icon)
-                        alert.append(err_msg)
-                        $('#form').before(alert)
-                        $('#alert').delay(3000).fadeOut(300)
+                    if (response.data.code === 200) {
+                        icon.attr('src', '{% static 'house_helper/img/icon/suc.png' %}').attr('alt', '成功')
+                        msg.text(response.data.data[argumentsKey][0]).prepend(icon)
+                        alert.attr('class', 'alert alert-success col-2 text-center fixed-top align-self-center')
+                        alert.fadeIn(100)
+                        alert.delay(1000).fadeOut(300,function () {
+                            window.location.href = '{% url 'index' %}'
+                        })
+                    } else if (argumentsKey) {
+                        icon.attr('src', '{% static 'house_helper/img/icon/err.png' %}').attr('alt', '错误')
+                        msg.text(response.data.data[argumentsKey][0]).prepend(icon)
+                        alert.fadeIn(100)
+                        alert.delay(3000).fadeOut(300)
                         break;
                     }
                 }

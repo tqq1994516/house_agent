@@ -3,7 +3,7 @@ from house_helper.models import Users
 
 
 class loginForm(forms.Form):
-    username_label = '用户名'
+    username_label = '用户名/手机号'
     password_label = '密码'
     username = forms.CharField(label=username_label, max_length=30,
                                min_length=1, error_messages={'required': '用户名不能为空', 'min_length': '用户名最少为1个字符',

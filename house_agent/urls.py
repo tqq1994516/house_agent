@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.staticfiles.views import serve
 from django.urls import path, include, re_path
 from house_helper import views
 
@@ -22,4 +23,5 @@ urlpatterns = [
     re_path(r'^$', views.login, name='login'),
     re_path(r'^login/?$', views.login, name='login'),
     path('admin/', admin.site.urls),
+    path('favicon.ico', serve, {'path': 'house_helper/img/icon/favicon.ico'})
 ]
