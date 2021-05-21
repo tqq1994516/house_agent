@@ -20,8 +20,11 @@ from house_helper import views
 
 urlpatterns = [
     path('house_helper/', include('house_helper.urls')),
-    re_path(r'^$', views.login, name='login'),
-    re_path(r'^login/?$', views.login, name='login'),
+    re_path(r'^$', views.login.as_view(), name='login'),
+    re_path(r'^login/?$', views.login.as_view(), name='login'),
+    path('admin/login/', views.extend_admin_login),
     path('admin/', admin.site.urls),
-    path('favicon.ico', serve, {'path': 'house_helper/img/icon/favicon.ico'})
+    path('favicon.ico', serve, {'path': 'house_helper/img/icon/favicon.ico'}),
+    re_path(r'^captcha/', include('captcha.urls')),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

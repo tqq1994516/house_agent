@@ -1,5 +1,11 @@
 {% extends 'mian.html' %}
 
-{% block page %}
+{% block section %}
 {% load static %}
+    <article class="row d-flex justify-content-center col-10 mt-3" style="background: white">
+        <h5 class="col-12 d-flex justify-content-start mt-1">天气情况</h5>
+        <div class="d-flex align-items-start">
+            <iframe style="pointer-events: none" width="280" height="300" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=55&icon=1"></iframe>
+        </div>
+    </article>
 {% endblock %}

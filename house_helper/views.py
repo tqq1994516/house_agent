@@ -1,22 +1,35 @@
 import re
-from django.core import serializers
+import sys
+from uuid import uuid4
+from django.contrib import admin
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, HttpResponse, redirect
+from ratelimit.decorators import ratelimit
+from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from house_agent.Authentication import LoginAuth
+from .admin import models
+from .menu_management import get_menu_list
 from .models import Users, Menus
-from .form import loginForm, registerForm
+from .serializers import loginForm, registerForm
 from .restful import success, params_error, server_error, unauth, method_error
 
 
-# Create your views here.
+class login(APIView):
+    authentication_classes = []
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+    def get(self, request):
+        serializer = loginForm()
+        return Response(serializer.data)
 
-def login(request):
-    if request.method == 'GET':
-        login_form = loginForm()
-        return render(request, 'login.html', {'form': login_form})
-    else:
-        login_form = loginForm(request.POST)
-        if login_form.is_valid():
-            valid_result = login_form.clean()
+    def post(self, request):
+        serializer = loginForm(request.POST)
+        if serializer.is_valid():
+            valid_result = serializer.save()
             if re.search('^\\d', valid_result['username']).group():
                 verify_account = Users.objects.filter(mobile_phone=valid_result['username']).first()
             else:
@@ -24,14 +37,44 @@ def login(request):
             if verify_account:
                 verify_password = Users.objects.filter(id=verify_account.id).first()
                 if verify_password.password.__eq__(valid_result['password']):
+                    token = uuid4()
+                    models.Token.objects.update_or_create(user=verify_account, defaults={'key': token})
+                    cache.set(token, verify_account)
                     msg = success(message='成功', data={'login': ['登录成功']})
                 else:
                     msg = unauth(message='失败', data={'password': ['账号输入有误或密码错误']})
             else:
                 msg = unauth(message='失败', data={'username': ['该账号未注册']})
         else:
-            msg = unauth(message='失败', data=login_form.errors)
-    return HttpResponse(msg)
+            msg = unauth(message='失败', data=serializer.errors)
+        return Response(msg)
+
+# def login(request):
+#     if request.method == 'GET':
+#         login_form = loginForm()
+#         return render(request, 'login.html', {'form': login_form})
+#     else:
+#         login_form = loginForm(request.POST)
+#         if login_form.is_valid():
+#             valid_result = login_form.clean()
+#             if re.search('^\\d', valid_result['username']).group():
+#                 verify_account = Users.objects.filter(mobile_phone=valid_result['username']).first()
+#             else:
+#                 verify_account = Users.objects.filter(username=valid_result['username']).first()
+#             if verify_account:
+#                 verify_password = Users.objects.filter(id=verify_account.id).first()
+#                 if verify_password.password.__eq__(valid_result['password']):
+#                     msg = success(message='成功', data={'login': ['登录成功']})
+#                     # token = uuid4()
+#                     # try:
+#                     #     models.Token.objects.filter(key=token)
+#                 else:
+#                     msg = unauth(message='失败', data={'password': ['账号输入有误或密码错误']})
+#             else:
+#                 msg = unauth(message='失败', data={'username': ['该账号未注册']})
+#         else:
+#             msg = unauth(message='失败', data=login_form.errors)
+#     return HttpResponse(msg)
 
 
 def register(request):
@@ -49,7 +92,8 @@ def register(request):
             valid_result = register_form.clean()
             repeatability_verification_username = Users.objects.filter(username=valid_result['username']).first()
             repeatability_verification_email = Users.objects.filter(username=valid_result['email']).first()
-            repeatability_verification_mobile_phone = Users.objects.filter(username=valid_result['mobile_phone']).first()
+            repeatability_verification_mobile_phone = Users.objects.filter(
+                username=valid_result['mobile_phone']).first()
             if repeatability_verification_username:
                 msg = params_error(message='失败', data={'username': ['账号已存在']})
             elif repeatability_verification_email:
@@ -78,6 +122,28 @@ def register(request):
 
 def index(request):
     if request.method == 'GET':
-        menu_list = Menus.objects.all()
-        menu_dict = serializers.serialize("json", menu_list)
-        return render(request, 'index.html', {'menu_list': menu_dict})
+        this_fun_name = sys._getframe().f_code.co_name
+        menu_dict = get_menu_list(this_fun_name)
+        return render(request, 'index.html', {'menu_list': menu_dict, 'username': request.user})
+
+
+def crm(request):
+    return redirect('base_info')
+
+
+def base_info(request):
+    if request.method == 'GET':
+        this_fun_name = sys._getframe().f_code.co_name
+        menu_dict = get_menu_list(this_fun_name)
+        print(request.session)
+        return render(request, 'base_info.html', {'menu_list': menu_dict, 'username': request.user})
+
+
+def message(request):
+    pass
+
+
+# 覆盖默认的admin登录方法实现登录限流
+@ratelimit(key='ip', rate='5/m', block=True)
+def extend_admin_login(request, extra_context=None):
+    return admin.site.login(request, extra_context)

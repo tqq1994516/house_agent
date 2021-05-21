@@ -17,7 +17,7 @@
 {% block page-login-form %}
     <div class="container-fluid" style="margin-top: 10%">
         <div class="row d-flex justify-content-center">
-            <div class= "alert alert-danger col-2 text-center fixed-top align-self-center" role = "alert" style = "margin: 30px auto auto auto; display: none;" id = "alert" >
+            <div class= "alert alert-danger col-2 text-center fixed-top" role = "alert" style = "margin: 30px auto auto auto; display: none;" id = "alert" >
                 <p>
                     <img src="{% static 'house_helper/img/icon/err.png' %}" style="width: 20px; height: 20px" alt="错误">
                 </p>
@@ -63,7 +63,7 @@
                     if (response.data.code === 200) {
                         icon.attr('src', '{% static 'house_helper/img/icon/suc.png' %}').attr('alt', '成功')
                         msg.text(response.data.data[argumentsKey][0]).prepend(icon)
-                        alert.attr('class', 'alert alert-success col-2 text-center fixed-top align-self-center')
+                        alert.attr('class', 'alert alert-success col-2 text-center fixed-top')
                         alert.fadeIn(100)
                         alert.delay(1000).fadeOut(300,function () {
                             window.location.href = '{% url 'index' %}'
@@ -71,6 +71,7 @@
                     } else if (argumentsKey) {
                         icon.attr('src', '{% static 'house_helper/img/icon/err.png' %}').attr('alt', '错误')
                         msg.text(response.data.data[argumentsKey][0]).prepend(icon)
+                        alert.attr('class', 'alert alert-danger col-2 text-center fixed-top')
                         alert.fadeIn(100)
                         alert.delay(3000).fadeOut(300)
                         break;
