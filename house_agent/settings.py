@@ -41,11 +41,13 @@ INSTALLED_APPS = [
     'multi_captcha_admin',
     'django.contrib.admin',
     'captcha',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -71,7 +73,34 @@ TEMPLATES = [
         },
     },
 ]
+# 跨域增加忽略
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = (
+#     '*'
+# )
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+    'VIEW',
+)
 
+CORS_ALLOW_HEADERS = (
+    'XMLHttpRequest',
+    'X_FILENAME',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)
 WSGI_APPLICATION = 'house_agent.wsgi.application'
 
 # Database
@@ -131,7 +160,7 @@ CACHES = {
             'CONNECTION_POOL_KWARGS': {
                 'max_connections': 512,  # 连接池的连接(最大连接)
             },
-            'PASSWORD': '123456',
+            # 'PASSWORD': '123456',
         }
     }
 }
@@ -152,6 +181,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'house_agent.Authentication.LoginAuth',
     ],
+    #分页
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    #每页显示的个数
+    'PAGE_SIZE': 10,
 }
 
 # Internationalization

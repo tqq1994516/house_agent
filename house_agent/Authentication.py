@@ -4,7 +4,6 @@ from django.core.cache import cache
 from house_helper.admin import models
 
 
-# Create your views here.
 class LoginAuth(BaseAuthentication):
     def authenticate(self, request):
         token = request.GET.get("token")
