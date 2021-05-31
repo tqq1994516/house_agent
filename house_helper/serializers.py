@@ -18,7 +18,7 @@ class menusSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Menus
-        fields = ('id', 'name', 'en_name', 'url', 'hierarchy', 'parent_id', 'have_child', 'icon', 'have_message_bubble')
+        fields = ('url', 'id', 'name', 'to_path', 'hierarchy', 'parent_id', 'have_child', 'icon', 'have_message_bubble')
 
 
 class registerForm(serializers.HyperlinkedModelSerializer):

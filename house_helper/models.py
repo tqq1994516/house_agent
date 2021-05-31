@@ -58,13 +58,12 @@ class base_info(models.Model):
 
 class Menus(models.Model):
     name = models.CharField(max_length=128, unique=True, default='', verbose_name='菜单名称')
-    en_name = models.CharField(max_length=128, unique=True, default='', verbose_name='英文名称')
-    url = models.CharField(max_length=254, unique=True, default='', verbose_name='菜单地址')
+    to_path = models.CharField(max_length=128, default='#', verbose_name='跳转地址')
     hierarchy = models.IntegerField(default=1, verbose_name='菜单层级')
     parent_id = models.IntegerField(default=0, verbose_name='父级菜单id')
-    have_child = models.BooleanField(default=0, verbose_name='是否含有子菜单')
-    icon = models.CharField(max_length=128, default='', verbose_name='菜单图标')
-    have_message_bubble = models.BooleanField(default=0, verbose_name='是否具有消息气泡')
+    have_child = models.BooleanField(default=True, verbose_name='是否含有子菜单')
+    icon = models.CharField(max_length=128, default='', null=True, blank=True, verbose_name='菜单图标')
+    have_message_bubble = models.BooleanField(default=False, verbose_name='是否具有消息气泡')
     c_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
     u_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')
 

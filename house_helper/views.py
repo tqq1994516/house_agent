@@ -1,11 +1,10 @@
+import json
 import re
 import sys
 from uuid import uuid4
-from django.contrib import admin
 from django.core.cache import cache
 from django.db.models import Q
 from django.shortcuts import render, HttpResponse, redirect
-from ratelimit.decorators import ratelimit
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin
@@ -32,7 +31,8 @@ class login(APIView):
         if serializer.is_valid():
             valid_result = serializer.save()
             if re.search('^\\d', valid_result['username']).group():
-                verify_account = Users.objects.get(Q(mobile_phone=valid_result['username']) | Q(username=valid_result['username']))
+                verify_account = Users.objects.get(
+                    Q(mobile_phone=valid_result['username']) | Q(username=valid_result['username']))
                 if verify_account.check_passord(valid_result['password']):
                     token = uuid4()
                     models.Token.objects.update_or_create(user=verify_account, defaults={'key': token})
@@ -53,16 +53,22 @@ class menuViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Menus.objects.all()
     serializer_class = menusSerializer
 
-    @action(detail=False, methods=['get'])
-    def lv1_menus(self, request):
-        data = Menus.objects.filter(hierarchy=1).all()
-        print(data.values())
-        page = self.paginate_queryset(data)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(data, many=True)
-        return Response(serializer)
+    @action(detail=True, methods=['get'])
+    def menus(self, request):
+        activeIndex = request.query_params.get('activeIndex')
+        data = self.get_queryset()
+        # 进行分页处理
+        # page = self.paginate_queryset(data)
+        # if page is not None:
+        #     serializer = self.get_serializer(page, many=True, context={'activeIndex': activeIndex})
+        #     response = self.get_paginated_response(serializer.data)
+        #     response.data['activeIndex'] = activeIndex
+        #     return response
+        serializer = self.get_serializer(data, many=True, context={'request': request})
+        response = json.dumps(serializer.data)
+        response = json.loads(response)
+        response.append({'activeIndex': activeIndex})
+        return Response(response)
 
 
 class register(CreateModelMixin, GenericViewSet):
@@ -77,7 +83,6 @@ class register(CreateModelMixin, GenericViewSet):
             step2 = re.search('\\d', step1).group()
             register_form['sex'][i].choice_value = step2
         return render(request, 'register.html', {'form': register_form})
-
 
     def post(self, request, format=None):
         register_form = registerForm(request.POST)
@@ -134,4 +139,3 @@ def base_info(request):
 
 def message(request):
     pass
-

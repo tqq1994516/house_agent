@@ -29,5 +29,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^captcha/', include('captcha.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'api/', include((router.urls, 'app_name'))),
+    path('api/', include(router.urls)),
 ]
