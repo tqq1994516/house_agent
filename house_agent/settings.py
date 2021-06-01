@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'simpleui',
+    'django_filters',
     'rest_framework',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -112,10 +113,11 @@ DATABASES = {
         'NAME': 'house_helper',  # 数据库名，先前创建的
         'USER': 'root',  # 用户名，可以自己创建用户
         'PASSWORD': '123456',  # 密码
-        'HOST': '192.168.136.128',  # mysql服务所在的主机ip
+        'HOST': '192.168.32.128',  # mysql服务所在的主机ip
         'PORT': '3306',  # mysql服务端口
     }
 }
+AUTH_USER_MODEL = 'house_helper.UserInfo'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -152,7 +154,7 @@ CACHES = {
         # 连接Redis数据库(服务器地址)
         # 一主带多从(可以配置个Redis，写走第一台，读走其他的机器)
         'LOCATION': [
-            'redis://192.168.136.128:6379/0',
+            'redis://localhost:6379/0',
         ],
         'KEY_PREFIX': 'house_helper',  # 项目名当做文件前缀
         'OPTIONS': {
@@ -175,16 +177,20 @@ SESSION_COOKIE_AGE = 60 * 60 * 8
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
+    # 只接受json请求
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    # 默认需要登录权限
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
+    # 登录拦截
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'house_agent.Authentication.LoginAuth',
     ],
-    #分页
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    #每页显示的个数
-    'PAGE_SIZE': 10,
+    #启用游标分页（性能最高）
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
 }
 
 # Internationalization

@@ -1,37 +1,35 @@
-import json
 import re
 import sys
 from uuid import uuid4
 from django.core.cache import cache
 from django.db.models import Q
 from django.shortcuts import render, HttpResponse, redirect
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
-from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet
+from house_agent.MyCursorPagination import MyCursorPagination
 from .admin import models
 from .menu_management import get_menu_list
-from .models import Users, Menus
+from .models import UserInfo, Menus
+from .myResponse import myResponse
 from .serializers import loginForm, registerForm, menusSerializer
-from .restful import success, params_error, server_error, unauth, method_error
 
 
 class login(APIView):
     authentication_classes = []
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    def get(self, request, format=None):
+    def get(self, request):
         serializer = loginForm()
         return Response(serializer.data)
 
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = loginForm(request.POST)
         if serializer.is_valid():
             valid_result = serializer.save()
             if re.search('^\\d', valid_result['username']).group():
-                verify_account = Users.objects.get(
+                verify_account = UserInfo.objects.get(
                     Q(mobile_phone=valid_result['username']) | Q(username=valid_result['username']))
                 if verify_account.check_passord(valid_result['password']):
                     token = uuid4()
@@ -53,8 +51,8 @@ class menuViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Menus.objects.all()
     serializer_class = menusSerializer
 
-    @action(detail=True, methods=['get'])
-    def menus(self, request):
+    @action(detail=False, methods=['get'])
+    def menusList(self, request):
         activeIndex = request.query_params.get('activeIndex')
         data = self.get_queryset()
         # 进行分页处理
@@ -65,57 +63,51 @@ class menuViewSet(viewsets.ReadOnlyModelViewSet):
         #     response.data['activeIndex'] = activeIndex
         #     return response
         serializer = self.get_serializer(data, many=True, context={'request': request})
-        response = json.dumps(serializer.data)
-        response = json.loads(response)
-        response.append({'activeIndex': activeIndex})
+        extra = {'activeIndex': activeIndex}
+        response = myResponse(status.HTTP_200_OK, serializer.data, extra)
         return Response(response)
 
 
-class register(CreateModelMixin, GenericViewSet):
+class registerViewSet(viewsets.ModelViewSet):
     authentication_classes = []
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = UserInfo.objects.all()
+    serializer_class = registerForm
+    ordering = 'c_time'
 
-    def get(self, request, format=None):
-        register_form = registerForm()
-        # 利用正则找出django生成标签中choice的value，动态添加属性方式，将value值再加入到对应的choice中，模板中使用添加的属性名访问value
-        for i, v in enumerate(register_form['sex']):
-            step1 = re.search('value=\\"[0-9]*\\"', str(v)).group()
-            step2 = re.search('\\d', step1).group()
-            register_form['sex'][i].choice_value = step2
-        return render(request, 'register.html', {'form': register_form})
-
-    def post(self, request, format=None):
-        register_form = registerForm(request.POST)
-        if register_form.is_valid():
-            valid_result = register_form.clean()
-            repeatability_verification_username = Users.objects.filter(username=valid_result['username']).first()
-            repeatability_verification_email = Users.objects.filter(username=valid_result['email']).first()
-            repeatability_verification_mobile_phone = Users.objects.filter(
+    def create(self, request, *args, **kwargs):
+        pagination = MyCursorPagination()
+        data = self.get_serializer(request.POST)
+        if data.is_valid():
+            valid_result = data.save()
+            repeatability_verification_username = UserInfo.objects.filter(username=valid_result['username']).first()
+            repeatability_verification_email = UserInfo.objects.filter(username=valid_result['email']).first()
+            repeatability_verification_mobile_phone = UserInfo.objects.filter(
                 username=valid_result['mobile_phone']).first()
             if repeatability_verification_username:
-                msg = params_error(message='失败', data={'username': ['账号已存在']})
+                response = myResponse(status.HTTP_400_BAD_REQUEST, data={'username': ['账号已存在']})
             elif repeatability_verification_email:
-                msg = params_error(message='失败', data={'email': ['邮箱已存在']})
+                response = myResponse(status.HTTP_400_BAD_REQUEST, data={'email': ['邮箱已存在']})
             elif repeatability_verification_mobile_phone:
-                msg = params_error(message='失败', data={'mobile_phone': ['手机号已存在']})
+                response = myResponse(status.HTTP_400_BAD_REQUEST, data={'mobile_phone': ['手机号已存在']})
             elif re.search('^\\d', valid_result['username']):
-                msg = params_error(message='失败', data={'username': ['账号不能以数字开头']})
+                response = myResponse(status.HTTP_400_BAD_REQUEST, data={'username': ['账号不能以数字开头']})
             elif valid_result['password'] == valid_result['password2']:
                 del valid_result['password2']
                 try:
-                    obj = Users.objects.create(**valid_result)
+                    obj = UserInfo.objects.create(**valid_result)
                     obj.save()
                 except Exception:
-                    msg = params_error(message='失败', data={'register': ['注册信息表内已存在']})
-                    return HttpResponse(msg)
-                msg = success(message='成功', data={'register': ['注册成功']})
+                    response = myResponse(status.HTTP_400_BAD_REQUEST, data={'register': ['注册信息表内已存在']})
+                    return Response(response)
+                response = myResponse(status.HTTP_200_OK, data={'register': ['注册成功']})
             elif valid_result['password'] == valid_result['username']:
-                msg = params_error(message='失败', data={'password': ['密码不能与账号一致']})
+                response = myResponse(status.HTTP_400_BAD_REQUEST, data={'password': ['密码不能与账号一致']})
             else:
-                msg = params_error(message='失败', data={'password2': ['两次密码不一致']})
+                response = myResponse(status.HTTP_400_BAD_REQUEST, data={'password2': ['两次密码不一致']})
         else:
-            msg = unauth(message='失败', data=register_form.errors)
-        return HttpResponse(msg)
+            response = myResponse(status.HTTP_400_BAD_REQUEST, data=data.errors)
+        return Response(response)
 
 
 def index(request):

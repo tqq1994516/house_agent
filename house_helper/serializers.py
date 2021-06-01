@@ -1,16 +1,13 @@
 from rest_framework import serializers
-from house_helper.models import Users, Menus
+from house_helper.models import UserInfo, Menus
 
 
 class loginForm(serializers.HyperlinkedModelSerializer):
-    username_label = '用户名/手机号'
-    password_label = '密码'
-    username = serializers.CharField(label=username_label, max_length=30, min_length=1, style=({'input_type': 'text'}))
-    password = serializers.CharField(label=password_label, max_length=30, min_length=1,
-                                     style=({'input_type': 'password'}))
+    username = serializers.CharField()
+    password = serializers.CharField()
 
     class Meta:
-        model = Users
+        model = UserInfo
         fields = ('username', 'password')
 
 
@@ -22,25 +19,10 @@ class menusSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class registerForm(serializers.HyperlinkedModelSerializer):
-    # username_label = '用户名'
-    # password_label = '密码'
-    # password2_label = '确认密码'
-    # true_name_label = '姓名'
-    # email_label = '邮箱'
-    # sex_label = '性别'
-    # sex_choices = models.GENDER
-    # mobile_phone_label = '手机'
-    # username = serializers.CharField(label=username_label, max_length=30, min_length=1, style=({'input_type': 'text'}))
-    # password = serializers.CharField(label=password_label, max_length=30, min_length=1, style=({'input_type': 'password'}))
-    # password2 = serializers.CharField(label=password2_label, max_length=30, min_length=1, style=({'input_type': 'password'}))
-    # true_name = serializers.CharField(label=true_name_label, max_length=30, min_length=2, style=({'input_type': 'text'}))
-    # email = serializers.EmailField(label=email_label, required=False, style=({'input_type': 'text'}))
-    # sex = serializers.ChoiceField(label=sex_label, style=({'base_template': 'radio.html'}), choices=sex_choices)
-    # mobile_phone = serializers.IntegerField(label=mobile_phone_label, style=({'input_type': 'text'}))
     password2_label = '确认密码'
     password2 = serializers.CharField(label=password2_label, max_length=30, min_length=1,
-                                      style=({'input_type': 'password'}))
+                                      style=({'base_template': 'input.html', 'input_type': 'password'}))
 
     class Meta:
-        model = Users
-        fields = '__all__'
+        model = UserInfo
+        fields = ('url', 'id', 'password', 'is_superuser', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'sex', 'mobile_phone')

@@ -1,26 +1,18 @@
 import re
-
+from django.utils import timezone
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # Create your models here.
 GENDER = ((1, '男'), (2, '女'))
 
 
-class Users(models.Model):
-    username = models.CharField(max_length=128, unique=True, default='', verbose_name='用户名',
-                                error_messages={'required': '用户名不能为空', 'min_length': '用户名最少为1个字符',
-                                                'max_length': '用户名最多为30个字符'})
-    password = models.CharField(max_length=128, default='', verbose_name='密码',
-                                error_messages={'required': '密码不能为空', 'min_length': '密码最少为1个字符',
-                                                'max_length': '密码最多为30个字符'})
-    true_name = models.CharField(max_length=20, default='', verbose_name='姓名',
-                                 error_messages={'required': '姓名不能为空', 'min_length': '姓名最少为2个字符',
-                                                 'max_length': '姓名最多为30个字符'})
-    email = models.EmailField(unique=True, default='', verbose_name='邮箱')
+class UserInfo(AbstractUser):
     sex = models.IntegerField(choices=GENDER, default=1, verbose_name='性别', error_messages={'required': '性别不能为空'})
     mobile_phone = models.BigIntegerField(unique=True, verbose_name='手机号')
-    c_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
-    u_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')
+    birthday = models.DateField(default=timezone.now, verbose_name='出生日期')
+    c_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    u_time = models.DateTimeField(auto_now=True, verbose_name='最后更新时间')
 
     def validate_mobile_phone(self, exclude=None):
         if not re.match(r'^1[356789]\d{9}&', exclude):

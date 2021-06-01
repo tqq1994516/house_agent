@@ -11,8 +11,8 @@ class LoginAuth(BaseAuthentication):
         user = cache.get(token)
         if user:
             return user, token
-        # token = models.Token.objects.filter(key=token).first()
-        # if token:
-        #     return token.user, token
+        token = models.Token.objects.filter(key=token).first()
+        if token:
+            return token.user, token
         else:
             raise AuthenticationFailed("尚未登陆")

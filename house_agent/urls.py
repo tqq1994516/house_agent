@@ -20,7 +20,8 @@ from house_helper import views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register(r'menus', views.menuViewSet, basename='menu')
+router.register(r'menus', views.menuViewSet)
+router.register(r'register', views.registerViewSet)
 
 urlpatterns = [
     path('house_helper/', include('house_helper.urls')),
