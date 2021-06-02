@@ -8,7 +8,7 @@ class loginForm(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = UserInfo
-        fields = ('username', 'password')
+        fields = ('url', 'id', 'username', 'password')
 
 
 class menusSerializer(serializers.HyperlinkedModelSerializer):

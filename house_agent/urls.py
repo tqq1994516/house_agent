@@ -25,7 +25,6 @@ router.register(r'register', views.registerViewSet)
 
 urlpatterns = [
     path('house_helper/', include('house_helper.urls')),
-    re_path(r'^$', views.login.as_view(), name='login'),
     re_path(r'^login/?$', views.login.as_view(), name='login'),
     path('admin/', admin.site.urls),
     re_path(r'^captcha/', include('captcha.urls')),
