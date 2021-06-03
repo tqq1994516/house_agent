@@ -1,2 +1,5 @@
 def myResponse(data, extra=None):
-    return {**{'data': data}, **extra}
+    if extra:
+        return {**{'data': data}, **extra}
+    else:
+        return data

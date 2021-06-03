@@ -9,7 +9,7 @@ GENDER = ((1, '男'), (2, '女'))
 
 class UserInfo(AbstractUser):
     sex = models.IntegerField(choices=GENDER, default=1, verbose_name='性别', error_messages={'required': '性别不能为空'})
-    mobile_phone = models.BigIntegerField(unique=True, verbose_name='手机号')
+    mobile_phone = models.CharField(unique=True, max_length=11, verbose_name='手机号')
     birthday = models.DateField(default=timezone.now, verbose_name='出生日期')
     c_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     u_time = models.DateTimeField(auto_now=True, verbose_name='最后更新时间')

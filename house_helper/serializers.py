@@ -19,10 +19,6 @@ class menusSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class registerForm(serializers.HyperlinkedModelSerializer):
-    password2_label = '确认密码'
-    password2 = serializers.CharField(label=password2_label, max_length=30, min_length=1,
-                                      style=({'base_template': 'input.html', 'input_type': 'password'}))
-
     class Meta:
         model = UserInfo
-        fields = ('url', 'id', 'password', 'is_superuser', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'sex', 'mobile_phone')
+        fields = ('url', 'id', 'password', 'is_superuser', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'sex', 'mobile_phone', 'birthday')

@@ -21,11 +21,11 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r'menus', views.menuViewSet)
-router.register(r'register', views.registerViewSet)
 
 urlpatterns = [
     path('house_helper/', include('house_helper.urls')),
     re_path(r'^login/?$', views.login.as_view(), name='login'),
+    re_path(r'^register/?$', views.register.as_view(), name='register'),
     path('admin/', admin.site.urls),
     re_path(r'^captcha/', include('captcha.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
