@@ -1,6 +1,8 @@
 import re
 import sys
 from uuid import uuid4
+
+from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.shortcuts import render, redirect
 from rest_framework import permissions, viewsets, status
@@ -85,30 +87,30 @@ class register(APIView):
         data = registerForm(data=request.data)
         if data.is_valid():
             valid_data = data.validated_data
-            print(valid_data['username'])
             repeatability_verification_username = UserInfo.objects.filter(username=valid_data['username']).first()
+            repeatability_verification_email = UserInfo.objects.filter(email=valid_data['email']).first()
             repeatability_verification_mobile_phone = UserInfo.objects.filter(
                 mobile_phone=valid_data['mobile_phone']).first()
             if repeatability_verification_username:
-                response = myResponse(data={'username': ['账号已存在']})
+                response = myResponse(data={'message': '账号已存在'})
             elif repeatability_verification_email:
-                response = myResponse(data={'email': ['邮箱已存在']})
+                response = myResponse(data={'message': '邮箱已存在'})
             elif repeatability_verification_mobile_phone:
-                response = myResponse(data={'mobile_phone': ['手机号已存在']})
+                response = myResponse(data={'message': '手机号已存在'})
             elif re.search('^\\d', valid_data['username']):
-                response = myResponse(data={'username': ['账号不能以数字开头']})
+                response = myResponse(data={'message': '账号不能以数字开头'})
             elif valid_data['password'] == valid_data['username']:
-                response = myResponse(data={'password': ['密码不能与账号一致']})
+                response = myResponse(data={'message': '密码不能与账号一致'})
             else:
                 try:
-                    valid_result = data.save()
-                    print(valid_result)
-                    response = myResponse(data={'register': ['注册成功']})
+                    data.save()
+                    response = myResponse(data={'message': '注册成功'})
                     return Response(response, status=status.HTTP_200_OK)
                 except Exception as e:
                     print(Exception, e)
-                    response = myResponse(data={'register': ['注册信息表内已存在']})
+                    response = myResponse(data={'message': '注册信息表内已存在'})
                     return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(data.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

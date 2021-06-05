@@ -21,4 +21,4 @@ class menusSerializer(serializers.HyperlinkedModelSerializer):
 class registerForm(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = UserInfo
-        fields = ('url', 'id', 'password', 'is_superuser', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'sex', 'mobile_phone', 'birthday')
+        fields = ('url', 'id', 'password', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'sex', 'mobile_phone', 'birthday')

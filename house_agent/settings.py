@@ -117,7 +117,6 @@ DATABASES = {
         'PORT': '3306',  # mysql服务端口
     }
 }
-AUTH_USER_MODEL = 'house_helper.UserInfo'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
