@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from .menu_management import get_menu_list
 from .models import UserInfo, Menus
 from .myResponse import myResponse
-from .serializers import loginForm, registerForm, menusSerializer
+from .serializers import loginSerializer, registerSerializer, menusSerializer
 
 
 class login(APIView):
@@ -16,11 +16,11 @@ class login(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
-        serializer = loginForm()
+        serializer = loginSerializer()
         return Response(serializer.data)
 
     def post(self, request):
-        data = loginForm(data=request.data)
+        data = loginSerializer(data=request.data)
         if data.is_valid():
             try:
                 if re.search('^\\d', request.data.get('username')).group():
@@ -55,11 +55,11 @@ class register(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
-        serializer = registerForm()
+        serializer = registerSerializer()
         return Response(serializer.data)
 
     def post(self, request):
-        data = registerForm(data=request.data)
+        data = registerSerializer(data=request.data)
         if data.is_valid():
             valid_data = data.validated_data
             repeatability_verification_username = UserInfo.objects.filter(username=valid_data['username']).first()

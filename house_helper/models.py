@@ -135,6 +135,11 @@ class base_info(models.Model):
     def __str__(self):
         return self.true_name
 
+    def validate_mobile_phone(self, exclude=None):
+        if not re.match(r'^1[356789]\d{9}$', exclude):
+            raise models.ValidationError('手机号码格式错误！！！')
+        return exclude
+
     class Meta:
         ordering = ['-c_time']
         verbose_name = '客户基础信息表'
