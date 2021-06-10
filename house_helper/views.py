@@ -5,10 +5,12 @@ from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from house_agent.MyCursorPagination import MyCursorPagination
+from .filter import baseInfoFilter
 from .menu_management import get_menu_list
-from .models import UserInfo, Menus
+from .models import UserInfo, Menus, base_info
 from .myResponse import myResponse
-from .serializers import loginSerializer, registerSerializer, menusSerializer
+from .serializers import loginSerializer, registerSerializer, menusSerializer, baseInfoSerializer
 
 
 class login(APIView):
@@ -124,3 +126,36 @@ class menuViewSet(viewsets.ReadOnlyModelViewSet):
 #         menu_dict = get_menu_list(this_fun_name)
 #         print(request.session)
 #         return render(request, 'base_info.html', {'menu_list': menu_dict, 'username': request.user})
+
+class baseInfoViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = base_info.objects.all()
+    serializer_class = baseInfoSerializer
+    pagination_class = MyCursorPagination
+    filterset_class = baseInfoFilter
+
+    # def list(self, request, *args, **kwargs):
+    #     data = self.get_queryset()
+    #     # 进行分页处理
+    #     page = self.paginate_queryset(data)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True, context={'request': request})
+    #         return self.get_paginated_response(serializer.data)
+    #     serializer = self.get_serializer(page, many=True, context={'request': request})
+    #     return Response(serializer.data)
+    #
+    # def retrieve(self, request, *args, **kwargs):
+    #     queryset = self.get_queryset()
+    #     queryset = self.filter_queryset(queryset)
+    #
+    # def update(self, request, *args, **kwargs):
+    #     pass
+    #
+    # def partial_update(self, request, *args, **kwargs):
+    #     pass
+    #
+    # def destroy(self, request, *args, **kwargs):
+    #     pass
+    #
+    # def create(self, request, *args, **kwargs):
+    #     pass

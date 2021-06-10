@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'captcha',
     'corsheaders',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -190,6 +191,7 @@ REST_FRAMEWORK = {
     ],
     #启用游标分页（性能最高）
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 # Internationalization

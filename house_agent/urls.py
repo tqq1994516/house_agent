@@ -21,6 +21,7 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r'menus', views.menuViewSet)
+router.register(r'baseInfo', views.baseInfoViewSet)
 
 urlpatterns = [
     path('house_helper/', include('house_helper.urls')),
