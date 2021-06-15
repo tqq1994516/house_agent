@@ -180,14 +180,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
-    # 默认需要登录权限
+    # 默认全部开放
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.AllowAny'
     ],
-    # 登录拦截
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'house_agent.Authentication.LoginAuth',
-    ],
+    # # 登录拦截
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'house_agent.Authentication.LoginAuth',
+    # ],
     #启用游标分页（性能最高）
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],

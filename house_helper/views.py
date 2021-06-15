@@ -18,8 +18,8 @@ from .serializers import LoginSerializer, RegisterSerializer, MenusSerializer, B
 
 
 class Login(APIView):
-    authentication_classes = []
-    permission_classes = (permissions.AllowAny,)
+    # authentication_classes = []
+    # permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         serializer = LoginSerializer()
@@ -49,8 +49,8 @@ class Login(APIView):
 
 
 class Logout(APIView):
-    authentication_classes = []
-    permission_classes = (permissions.AllowAny,)
+    # authentication_classes = []
+    # permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         pass
@@ -96,8 +96,8 @@ class Register(APIView):
 
 
 class MenuViewSet(viewsets.ReadOnlyModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = Menus.objects.all()
     serializer_class = MenusSerializer
 
@@ -119,8 +119,8 @@ class MenuViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class BaseInfoViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = BaseInfo.objects.all()
     serializer_class = BaseInfoSerializer
     pagination_class = MyCursorPagination
@@ -128,8 +128,8 @@ class BaseInfoViewSet(viewsets.ModelViewSet):
 
 
 class CallLogViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = CallLog.objects.all()
     serializer_class = CallLogSerializer
     pagination_class = MyCursorPagination
@@ -176,8 +176,8 @@ class CallLogViewSet(viewsets.ModelViewSet):
 
 
 class TagTypeViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagType.objects.all()
     serializer_class = TagTypeSerializer
     pagination_class = MyCursorPagination
@@ -185,8 +185,8 @@ class TagTypeViewSet(viewsets.ModelViewSet):
 
 
 class TagViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = MyCursorPagination
@@ -194,8 +194,8 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class TagRuleViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRule.objects.all()
     serializer_class = TagRuleSerializer
     pagination_class = MyCursorPagination
@@ -203,8 +203,8 @@ class TagRuleViewSet(viewsets.ModelViewSet):
 
 
 class TagRuleRelationViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRuleRelation.objects.all()
     serializer_class = TagRuleRelationSerializer
     pagination_class = MyCursorPagination
@@ -212,8 +212,8 @@ class TagRuleRelationViewSet(viewsets.ModelViewSet):
 
 
 class TagRelationViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRelation.objects.all()
     serializer_class = TagRelationSerializer
     pagination_class = MyCursorPagination
@@ -221,8 +221,8 @@ class TagRelationViewSet(viewsets.ModelViewSet):
 
 
 class HouseInfoViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    # authentication_classes = []
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = HouseInfo.objects.all()
     serializer_class = HouseInfoSerializer
     pagination_class = MyCursorPagination
