@@ -122,7 +122,7 @@ class Menus(models.Model):
         verbose_name_plural = '菜单列表'
 
 
-class base_info(models.Model):
+class BaseInfo(models.Model):
     true_name = models.CharField(max_length=128, default='', verbose_name='姓名')
     email = models.EmailField(blank=True, null=True, verbose_name='邮箱')
     sex = models.IntegerField(choices=Gender.choices, default=1, verbose_name='性别')
@@ -146,9 +146,9 @@ class base_info(models.Model):
         verbose_name_plural = '客户基础信息表'
 
 
-class call_log(models.Model):
+class CallLog(models.Model):
     type = models.IntegerField(choices=CallType.choices, default=1, verbose_name='通话类型')
-    contacts_id = models.ForeignKey(base_info, on_delete=models.CASCADE, verbose_name='联系人id')  # 通过外键id查询对应名称
+    contacts_id = models.ForeignKey(BaseInfo, on_delete=models.CASCADE, verbose_name='联系人id')  # 通过外键id查询对应名称
     start_time = models.DateTimeField(verbose_name='开始时间')
     end_time = models.DateTimeField(verbose_name='结束时间')
     call_duration = models.IntegerField(verbose_name='通话时长')
@@ -161,7 +161,7 @@ class call_log(models.Model):
         verbose_name_plural = '通话记录表'
 
 
-class tag_type(models.Model):
+class TagType(models.Model):
     name = models.CharField(max_length=150, unique=True, verbose_name='标签类型')
     c_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
     u_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')
@@ -175,9 +175,9 @@ class tag_type(models.Model):
         verbose_name_plural = '标签类型表'
 
 
-class tag(models.Model):
+class Tag(models.Model):
     name = models.CharField(max_length=150, unique=True, verbose_name='标签名称')
-    type = models.ForeignKey(tag_type, on_delete=models.CASCADE)
+    type_id = models.ForeignKey(TagType, on_delete=models.CASCADE)
     c_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
     u_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')
 
@@ -190,7 +190,7 @@ class tag(models.Model):
         verbose_name_plural = '标签列表'
 
 
-class tag_rule(models.Model):
+class TagRule(models.Model):
     rule_name = models.CharField(max_length=150, verbose_name='规则名称')
     c_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
     u_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')
@@ -204,9 +204,9 @@ class tag_rule(models.Model):
         verbose_name_plural = '标签规则表'
 
 
-class tag_rule_relation(models.Model):
-    rule_id = models.ForeignKey(tag_rule, on_delete=models.CASCADE, verbose_name='规则id')
-    tag_id = models.ForeignKey(tag, on_delete=models.CASCADE, verbose_name='标签id')
+class TagRuleRelation(models.Model):
+    rule_id = models.ForeignKey(TagRule, on_delete=models.CASCADE, verbose_name='规则id')
+    tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='标签id')
     c_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
     u_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')
 
@@ -216,9 +216,9 @@ class tag_rule_relation(models.Model):
         verbose_name_plural = '标签规则与标签关系表'
 
 
-class tag_relation(models.Model):
-    customer_name = models.ForeignKey(base_info, on_delete=models.CASCADE)
-    tag_id = models.ForeignKey(tag, on_delete=models.CASCADE, verbose_name='标签id')
+class TagRelation(models.Model):
+    customer_name_id = models.ForeignKey(BaseInfo, on_delete=models.CASCADE)
+    tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='标签id')
     c_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
     u_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')
 
@@ -228,7 +228,7 @@ class tag_relation(models.Model):
         verbose_name_plural = '客户与标签关系表'
 
 
-class house_info(models.Model):
+class HouseInfo(models.Model):
     title = models.CharField(max_length=150, verbose_name='标题')
     subhead = models.CharField(max_length=150, verbose_name='副标题')
     totalPrices = models.CharField(max_length=150, verbose_name='总价')

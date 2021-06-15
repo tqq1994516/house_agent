@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'captcha',
     'corsheaders',
-    'django_filters',
 ]
 
 MIDDLEWARE = [

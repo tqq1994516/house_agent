@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from uuid import uuid4
 from django.core.cache import cache
 from rest_framework import permissions, viewsets, status
@@ -6,23 +7,26 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from house_agent.MyCursorPagination import MyCursorPagination
-from .filter import baseInfoFilter
+from .filter import BaseInfoFilter, CallLogFilter, TagTypeFilter, TagFilter, TagRuleFilter, HouseInfoFilter, \
+    TagRuleRelationFilter, TagRelationFilter
 from .menu_management import get_menu_list
-from .models import UserInfo, Menus, base_info
+from .models import UserInfo, Menus, BaseInfo, CallLog, TagType, Tag, TagRule, HouseInfo, TagRuleRelation, TagRelation
 from .myResponse import myResponse
-from .serializers import loginSerializer, registerSerializer, menusSerializer, baseInfoSerializer
+from .serializers import LoginSerializer, RegisterSerializer, MenusSerializer, BaseInfoSerializer, CallLogSerializer, \
+    TagTypeSerializer, TagSerializer, TagRuleSerializer, HouseInfoSerializer, TagRuleRelationSerializer, \
+    TagRelationSerializer
 
 
-class login(APIView):
+class Login(APIView):
     authentication_classes = []
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
-        serializer = loginSerializer()
+        serializer = LoginSerializer()
         return Response(serializer.data)
 
     def post(self, request):
-        data = loginSerializer(data=request.data)
+        data = LoginSerializer(data=request.data)
         if data.is_valid():
             try:
                 if re.search('^\\d', request.data.get('username')).group():
@@ -44,7 +48,7 @@ class login(APIView):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
-class logout(APIView):
+class Logout(APIView):
     authentication_classes = []
     permission_classes = (permissions.AllowAny,)
 
@@ -52,16 +56,16 @@ class logout(APIView):
         pass
 
 
-class register(APIView):
+class Register(APIView):
     authentication_classes = []
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
-        serializer = registerSerializer()
+        serializer = RegisterSerializer()
         return Response(serializer.data)
 
     def post(self, request):
-        data = registerSerializer(data=request.data)
+        data = RegisterSerializer(data=request.data)
         if data.is_valid():
             valid_data = data.validated_data
             repeatability_verification_username = UserInfo.objects.filter(username=valid_data['username']).first()
@@ -91,11 +95,11 @@ class register(APIView):
         return Response(data.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class menuViewSet(viewsets.ReadOnlyModelViewSet):
+class MenuViewSet(viewsets.ReadOnlyModelViewSet):
     authentication_classes = []
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = Menus.objects.all()
-    serializer_class = menusSerializer
+    serializer_class = MenusSerializer
 
     @action(detail=False, methods=['get'])
     def menusList(self, request):
@@ -113,49 +117,113 @@ class menuViewSet(viewsets.ReadOnlyModelViewSet):
         response = myResponse(serializer.data, extra)
         return Response(response, status=status.HTTP_200_OK)
 
-# def index(request):
-#     if request.method == 'GET':
-#         this_fun_name = sys._getframe().f_code.co_name
-#         menu_dict = get_menu_list(this_fun_name)
-#         return render(request, 'index.html', {'menu_list': menu_dict, 'username': request.user})
 
-
-# def base_info(request):
-#     if request.method == 'GET':
-#         this_fun_name = sys._getframe().f_code.co_name
-#         menu_dict = get_menu_list(this_fun_name)
-#         print(request.session)
-#         return render(request, 'base_info.html', {'menu_list': menu_dict, 'username': request.user})
-
-class baseInfoViewSet(viewsets.ModelViewSet):
+class BaseInfoViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-    queryset = base_info.objects.all()
-    serializer_class = baseInfoSerializer
+    queryset = BaseInfo.objects.all()
+    serializer_class = BaseInfoSerializer
     pagination_class = MyCursorPagination
-    filterset_class = baseInfoFilter
+    filterset_class = BaseInfoFilter
 
-    # def list(self, request, *args, **kwargs):
-    #     data = self.get_queryset()
-    #     # 进行分页处理
-    #     page = self.paginate_queryset(data)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True, context={'request': request})
-    #         return self.get_paginated_response(serializer.data)
-    #     serializer = self.get_serializer(page, many=True, context={'request': request})
-    #     return Response(serializer.data)
-    #
-    # def retrieve(self, request, *args, **kwargs):
-    #     queryset = self.get_queryset()
-    #     queryset = self.filter_queryset(queryset)
-    #
-    # def update(self, request, *args, **kwargs):
-    #     pass
-    #
-    # def partial_update(self, request, *args, **kwargs):
-    #     pass
-    #
-    # def destroy(self, request, *args, **kwargs):
-    #     pass
-    #
-    # def create(self, request, *args, **kwargs):
-    #     pass
+
+class CallLogViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = (permissions.AllowAny,)
+    queryset = CallLog.objects.all()
+    serializer_class = CallLogSerializer
+    pagination_class = MyCursorPagination
+    filterset_class = CallLogFilter
+
+    def calculate_call_duration(self, request, start_time=None, end_time=None):
+        if start_time:
+            start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+        else:
+            start_time = datetime.strptime(request.data['start_time'], "%Y-%m-%d %H:%M:%S")
+        if end_time:
+            end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+        else:
+            end_time = datetime.strptime(request.data['end_time'], "%Y-%m-%d %H:%M:%S")
+        request.data['call_duration'] = (end_time - start_time).total_seconds()
+
+    def create(self, request, *args, **kwargs):
+        self.calculate_call_duration(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        self.calculate_call_duration(request)
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        self.calculate_call_duration(request)
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+
+class TagTypeViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = TagType.objects.all()
+    serializer_class = TagTypeSerializer
+    pagination_class = MyCursorPagination
+    filterset_class = TagTypeFilter
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = MyCursorPagination
+    filterset_class = TagFilter
+
+
+class TagRuleViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = TagRule.objects.all()
+    serializer_class = TagRuleSerializer
+    pagination_class = MyCursorPagination
+    filterset_class = TagRuleFilter
+
+
+class TagRuleRelationViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = TagRuleRelation.objects.all()
+    serializer_class = TagRuleRelationSerializer
+    pagination_class = MyCursorPagination
+    filterset_class = TagRuleRelationFilter
+
+
+class TagRelationViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = TagRelation.objects.all()
+    serializer_class = TagRelationSerializer
+    pagination_class = MyCursorPagination
+    filterset_class = TagRelationFilter
+
+
+class HouseInfoViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = HouseInfo.objects.all()
+    serializer_class = HouseInfoSerializer
+    pagination_class = MyCursorPagination
+    filterset_class = HouseInfoFilter

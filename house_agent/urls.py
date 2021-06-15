@@ -13,20 +13,27 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+
 from django.contrib import admin
 from django.urls import path, include, re_path
 from house_helper import views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register(r'menus', views.menuViewSet)
-router.register(r'baseInfo', views.baseInfoViewSet)
+router.register(r'menus', views.MenuViewSet)
+router.register(r'baseInfo', views.BaseInfoViewSet)
+router.register(r'callLog', views.CallLogViewSet)
+router.register(r'tagType', views.TagTypeViewSet)
+router.register(r'tag', views.TagViewSet)
+router.register(r'tagRule', views.TagRuleViewSet)
+router.register(r'houseInfo', views.HouseInfoViewSet)
+router.register(r'tagRuleRelation', views.TagRuleRelationViewSet)
+router.register(r'tagRelation', views.TagRelationViewSet)
 
 urlpatterns = [
     path('house_helper/', include('house_helper.urls')),
-    re_path(r'^login/?$', views.login.as_view(), name='login'),
-    re_path(r'^register/?$', views.register.as_view(), name='register'),
+    re_path(r'^login/?$', views.Login.as_view(), name='login'),
+    re_path(r'^register/?$', views.Register.as_view(), name='register'),
     path('admin/', admin.site.urls),
     re_path(r'^captcha/', include('captcha.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
