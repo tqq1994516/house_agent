@@ -129,7 +129,7 @@ class BaseInfoViewSet(viewsets.ModelViewSet):
 
 class CallLogViewSet(viewsets.ModelViewSet):
     authentication_classes = []
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = CallLog.objects.all()
     serializer_class = CallLogSerializer
     pagination_class = MyCursorPagination
