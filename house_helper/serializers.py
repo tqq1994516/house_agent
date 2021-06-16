@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from house_helper.models import UserInfo, Menus, BaseInfo, CallLog, TagType, Tag, TagRule, HouseInfo, TagRuleRelation, \
+from house_helper.models import User, Menus, BaseInfo, CallLog, TagType, Tag, TagRule, HouseInfo, TagRuleRelation, \
     TagRelation
 
 
@@ -8,22 +8,22 @@ class LoginSerializer(serializers.HyperlinkedModelSerializer):
     password = serializers.CharField()
 
     class Meta:
-        model = UserInfo
+        model = User
         fields = ('url', 'id', 'username', 'password')
+
+
+class RegisterSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'url', 'id', 'password', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'sex',
+            'mobile_phone', 'birthday')
 
 
 class MenusSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Menus
         fields = ('url', 'id', 'name', 'to_path', 'hierarchy', 'parent_id', 'have_child', 'icon', 'have_message_bubble')
-
-
-class RegisterSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = UserInfo
-        fields = (
-            'url', 'id', 'password', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'sex',
-            'mobile_phone', 'birthday')
 
 
 class BaseInfoSerializer(serializers.HyperlinkedModelSerializer):
