@@ -78,9 +78,9 @@ class User(AbstractUser):
                                     error_messages={'unique': 'A user with that mobilePhone already exists.'})
     first_name = models.CharField(max_length=150, null=True, blank=True, verbose_name='姓')
     last_name = models.CharField(max_length=150, null=True, blank=True, verbose_name='名')
-    sex = models.IntegerField(choices=Gender.choices, default='男', verbose_name='性别',
+    sex = models.IntegerField(choices=Gender.choices, null=True, blank=True, default=1, verbose_name='性别',
                               error_messages={'required': '性别不能为空'})
-    birthday = models.DateField(default=timezone.now, verbose_name='出生日期')
+    birthday = models.DateField(null=True, blank=True, default=timezone.now, verbose_name='出生日期')
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)

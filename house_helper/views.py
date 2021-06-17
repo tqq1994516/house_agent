@@ -11,92 +11,112 @@ from .filter import BaseInfoFilter, CallLogFilter, TagTypeFilter, TagFilter, Tag
     TagRuleRelationFilter, TagRelationFilter
 from .models import User, Menus, BaseInfo, CallLog, TagType, Tag, TagRule, HouseInfo, TagRuleRelation, TagRelation
 from .myResponse import myResponse
-from .serializers import LoginSerializer, RegisterSerializer, MenusSerializer, BaseInfoSerializer, CallLogSerializer, \
+from .serializers import LoginSerializer, MenusSerializer, BaseInfoSerializer, CallLogSerializer, \
     TagTypeSerializer, TagSerializer, TagRuleSerializer, HouseInfoSerializer, TagRuleRelationSerializer, \
-    TagRelationSerializer
+    TagRelationSerializer, RegisterSerializer
+from django.contrib.auth import authenticate, login, logout
 
 
-# class Login(APIView):
-#     # authentication_classes = []
-#     # permission_classes = (permissions.AllowAny,)
-#
-#     def get(self, request):
-#         serializer = LoginSerializer()
-#         return Response(serializer.data)
-#
-#     def post(self, request):
-#         data = LoginSerializer(data=request.data)
-#         if data.is_valid():
-#             try:
-#                 if re.search('^\\d', request.data.get('username')).group():
-#                     userInfo = User.objects.get(mobile_phone=request.data.get('username')).first()
-#                 else:
-#                     userInfo = User.objects.get(username=request.data.get('username')).first()
-#                 if userInfo['password'] == request.data.get('password') and userInfo['is_staff'] == 2 and userInfo[
-#                     'is_active'] == 1:
-#                     token = uuid4()
-#                     cache.set(token, userInfo)
-#                     User.objects.filter(id=userInfo['id']).update(is_active='1')
-#                     response = myResponse(data={'message': '登录成功'})
-#                     return Response(response, status=status.HTTP_200_OK)
-#                 else:
-#                     response = myResponse(data={'message': '账号输入有误或密码错误', 'form': data})
-#                     return Response(response, status=status.HTTP_400_BAD_REQUEST)
-#             except Exception:
-#                 response = myResponse(data={'message': '该账号未注册', 'form': data})
-#                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
-#
-#
-# class Logout(APIView):
-#     # authentication_classes = []
-#     # permission_classes = (permissions.AllowAny,)
-#
-#     def get(self, request):
-#         pass
-#
-#
-# class Register(APIView):
-#     authentication_classes = []
-#     permission_classes = (permissions.AllowAny,)
-#
-#     def get(self, request):
-#         serializer = RegisterSerializer()
-#         return Response(serializer.data)
-#
-#     def post(self, request):
-#         data = RegisterSerializer(data=request.data)
-#         if data.is_valid():
-#             valid_data = data.validated_data
-#             repeatability_verification_username = UserInfo.objects.filter(username=valid_data['username']).first()
-#             repeatability_verification_email = UserInfo.objects.filter(email=valid_data['email']).first()
-#             repeatability_verification_mobile_phone = UserInfo.objects.filter(
-#                 mobile_phone=valid_data['mobile_phone']).first()
-#             if repeatability_verification_username:
-#                 response = myResponse(data={'message': '账号已存在', 'form': data})
-#             elif repeatability_verification_email:
-#                 response = myResponse(data={'message': '邮箱已存在', 'form': data})
-#             elif repeatability_verification_mobile_phone:
-#                 response = myResponse(data={'message': '手机号已存在', 'form': data})
-#             elif re.search('^\\d', valid_data['username']):
-#                 response = myResponse(data={'message': '账号不能以数字开头', 'form': data})
-#             elif valid_data['password'] == valid_data['username']:
-#                 response = myResponse(data={'message': '密码不能与账号一致', 'form': data})
-#             else:
-#                 try:
-#                     data.save()
-#                     response = myResponse(data={'message': '注册成功'})
-#                     return Response(response, status=status.HTTP_200_OK)
-#                 except Exception as e:
-#                     print(Exception, e)
-#                     response = myResponse(data={'message': '注册信息表内已存在', 'form': data})
-#                     return Response(response, status=status.HTTP_400_BAD_REQUEST)
-#             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-#         return Response(data.errors, status=status.HTTP_400_BAD_REQUEST)
+class Login(APIView):
+    authentication_classes = []
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        serializer = LoginSerializer()
+        return Response(serializer.data)
+
+    def post(self, request):
+        data = LoginSerializer(data=request.data)
+        if data.is_valid():
+            valid_data = data.validated_data
+            try:
+                if re.search('[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$', valid_data['username']):
+                    result_data = User.objects.filter(email=valid_data['username']).first()
+                    if result_data:
+                        valid_data['username'] = result_data.username
+                    else:
+                        response = myResponse(data={'message': '邮箱未注册', 'form': valid_data})
+                        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+                elif re.search('^\\d', valid_data['username']):
+                    result_data = User.objects.filter(mobile_phone=valid_data['username']).first()
+                    if result_data:
+                        valid_data['username'] = result_data.username
+                    else:
+                        response = myResponse(data={'message': '手机号未注册', 'form': valid_data})
+                        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+                username = valid_data['username']
+                password = valid_data['password']
+                user = authenticate(request, username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    token = uuid4()
+                    cache.set(token, user)
+                    response = myResponse(data={'message': '登录成功'})
+                    headers = {authenticate: token}
+                    return Response(response, status=status.HTTP_200_OK, headers=headers)
+                else:
+                    response = myResponse(data={'message': '账号输入有误或密码错误', 'form': valid_data})
+                    return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                print(e)
+                response = myResponse(data={'message': '该账号未注册', 'form': valid_data})
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(data.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Logout(APIView):
+    authentication_classes = []
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        logout(request)
+        token = request.headers['authenticate']
+        cache.delete(token)
+        response = myResponse(data={'message': '退出成果'})
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class Register(APIView):
+    authentication_classes = []
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        serializer = RegisterSerializer()
+        return Response(serializer.data)
+
+    def post(self, request):
+        data = RegisterSerializer(data=request.data)
+        if data.is_valid():
+            valid_data = data.validated_data
+            repeatability_verification_username = User.objects.filter(username=valid_data['username']).first()
+            repeatability_verification_email = User.objects.filter(email=valid_data['email']).first()
+            repeatability_verification_mobile_phone = User.objects.filter(
+                mobile_phone=valid_data['mobile_phone']).first()
+            if repeatability_verification_username:
+                response = myResponse(data={'message': '账号已存在', 'form': valid_data})
+            elif repeatability_verification_email:
+                response = myResponse(data={'message': '邮箱已存在', 'form': valid_data})
+            elif repeatability_verification_mobile_phone:
+                response = myResponse(data={'message': '手机号已存在', 'form': valid_data})
+            elif re.search('^\\d', valid_data['username']):
+                response = myResponse(data={'message': '账号不能以数字开头', 'form': valid_data})
+            elif valid_data['password'] == valid_data['username']:
+                response = myResponse(data={'message': '密码不能与账号一致', 'form': valid_data})
+            else:
+                try:
+                    data.save()
+                    response = myResponse(data={'message': '注册成功'})
+                    return Response(response, status=status.HTTP_200_OK)
+                except Exception:
+                    response = myResponse(data={'message': '注册信息表内已存在', 'form': valid_data})
+                    return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MenuViewSet(viewsets.ReadOnlyModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = Menus.objects.all()
     serializer_class = MenusSerializer
 
@@ -118,8 +138,7 @@ class MenuViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class BaseInfoViewSet(viewsets.ModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = BaseInfo.objects.all()
     serializer_class = BaseInfoSerializer
     pagination_class = MyCursorPagination
@@ -127,8 +146,7 @@ class BaseInfoViewSet(viewsets.ModelViewSet):
 
 
 class CallLogViewSet(viewsets.ModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = CallLog.objects.all()
     serializer_class = CallLogSerializer
     pagination_class = MyCursorPagination
@@ -175,8 +193,7 @@ class CallLogViewSet(viewsets.ModelViewSet):
 
 
 class TagTypeViewSet(viewsets.ModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagType.objects.all()
     serializer_class = TagTypeSerializer
     pagination_class = MyCursorPagination
@@ -184,8 +201,7 @@ class TagTypeViewSet(viewsets.ModelViewSet):
 
 
 class TagViewSet(viewsets.ModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = MyCursorPagination
@@ -193,8 +209,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class TagRuleViewSet(viewsets.ModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRule.objects.all()
     serializer_class = TagRuleSerializer
     pagination_class = MyCursorPagination
@@ -202,8 +217,7 @@ class TagRuleViewSet(viewsets.ModelViewSet):
 
 
 class TagRuleRelationViewSet(viewsets.ModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRuleRelation.objects.all()
     serializer_class = TagRuleRelationSerializer
     pagination_class = MyCursorPagination
@@ -211,8 +225,7 @@ class TagRuleRelationViewSet(viewsets.ModelViewSet):
 
 
 class TagRelationViewSet(viewsets.ModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRelation.objects.all()
     serializer_class = TagRelationSerializer
     pagination_class = MyCursorPagination
@@ -220,8 +233,7 @@ class TagRelationViewSet(viewsets.ModelViewSet):
 
 
 class HouseInfoViewSet(viewsets.ModelViewSet):
-    # authentication_classes = []
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = HouseInfo.objects.all()
     serializer_class = HouseInfoSerializer
     pagination_class = MyCursorPagination
