@@ -238,7 +238,7 @@ class TagRuleRelation(models.Model):
 
 
 class TagRelation(models.Model):
-    customer_name_id = models.ForeignKey(BaseInfo, on_delete=models.CASCADE)
+    customer_name_id = models.ForeignKey(BaseInfo, on_delete=models.CASCADE, verbose_name='客户id')
     tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='标签id')
     c_time = models.DateTimeField(auto_now=True, verbose_name='创建时间')
     u_time = models.DateTimeField(auto_now_add=True, verbose_name='最后更新时间')

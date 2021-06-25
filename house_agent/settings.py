@@ -188,8 +188,9 @@ REST_FRAMEWORK = {
     # 'DEFAULT_AUTHENTICATION_CLASSES': [
     #     'house_agent.Authentication.LoginAuth',
     # ],
-    #启用游标分页（性能最高）
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
+    # 启用自定义分页
+    'DEFAULT_PAGINATION_CLASS': 'house_helper.MyPagination.MyPageNumberPagination',
+    # 查询插件
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 

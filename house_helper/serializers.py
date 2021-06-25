@@ -19,6 +19,7 @@ class LoginSerializer(serializers.HyperlinkedModelSerializer):
 class RegisterSerializer(serializers.HyperlinkedModelSerializer):
     password = serializers.CharField(label='Password')
     password2 = serializers.CharField(label='Password confirmation')
+    sex = serializers.CharField(source='get_sex_display')
 
     class Meta:
         model = User
@@ -44,6 +45,7 @@ class UserChangeSerializer(serializers.HyperlinkedModelSerializer):
     disabled password hash display field.
     """
     password = ReadOnlyPasswordHashField()
+    sex = serializers.CharField(source='get_sex_display')
 
     class Meta:
         model = User
@@ -57,6 +59,8 @@ class MenusSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BaseInfoSerializer(serializers.HyperlinkedModelSerializer):
+    sex = serializers.CharField(source='get_sex_display')
+
     class Meta:
         model = BaseInfo
         fields = ('url', 'id', 'true_name', 'email', 'sex', 'mobile_phone', 'birthday', 'address')
@@ -93,9 +97,13 @@ class TagRuleRelationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TagRelationSerializer(serializers.HyperlinkedModelSerializer):
+    customer_name_id = serializers.IntegerField(source='customer_name_id.id')
+    true_name = serializers.CharField(source='customer_name_id.true_name')
+    tag_name = serializers.CharField(source='tag_id.name')
+
     class Meta:
         model = TagRelation
-        fields = ('url', 'id', 'customer_name_id', 'tag_id')
+        fields = ('url', 'id', 'customer_name_id', 'true_name', 'tag_name')
 
 
 class HouseInfoSerializer(serializers.HyperlinkedModelSerializer):

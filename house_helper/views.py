@@ -6,8 +6,7 @@ from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from house_helper.MyCursorPagination import MyCursorPagination
-from .filter import BaseInfoFilter, CallLogFilter, TagTypeFilter, TagFilter, TagRuleFilter, HouseInfoFilter, \
+from .MyFilter import BaseInfoFilter, CallLogFilter, TagTypeFilter, TagFilter, TagRuleFilter, HouseInfoFilter, \
     TagRuleRelationFilter, TagRelationFilter
 from .models import User, Menus, BaseInfo, CallLog, TagType, Tag, TagRule, HouseInfo, TagRuleRelation, TagRelation
 from .myResponse import myResponse
@@ -122,7 +121,6 @@ class MenuViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['get'])
     def menusList(self, request):
-        activeIndex = request.query_params.get('activeIndex')
         data = self.get_queryset()
         # 进行分页处理
         # page = self.paginate_queryset(data)
@@ -132,8 +130,7 @@ class MenuViewSet(viewsets.ReadOnlyModelViewSet):
         #     response.data['activeIndex'] = activeIndex
         #     return response
         serializer = self.get_serializer(data, many=True, context={'request': request})
-        extra = {'activeIndex': activeIndex}
-        response = myResponse(serializer.data, extra)
+        response = myResponse(serializer.data)
         return Response(response, status=status.HTTP_200_OK)
 
 
@@ -141,7 +138,6 @@ class BaseInfoViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = BaseInfo.objects.all()
     serializer_class = BaseInfoSerializer
-    pagination_class = MyCursorPagination
     filterset_class = BaseInfoFilter
 
 
@@ -149,7 +145,6 @@ class CallLogViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = CallLog.objects.all()
     serializer_class = CallLogSerializer
-    pagination_class = MyCursorPagination
     filterset_class = CallLogFilter
 
     def calculate_call_duration(self, request, start_time=None, end_time=None):
@@ -196,7 +191,6 @@ class TagTypeViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagType.objects.all()
     serializer_class = TagTypeSerializer
-    pagination_class = MyCursorPagination
     filterset_class = TagTypeFilter
 
 
@@ -204,7 +198,6 @@ class TagViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    pagination_class = MyCursorPagination
     filterset_class = TagFilter
 
 
@@ -212,7 +205,6 @@ class TagRuleViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRule.objects.all()
     serializer_class = TagRuleSerializer
-    pagination_class = MyCursorPagination
     filterset_class = TagRuleFilter
 
 
@@ -220,7 +212,6 @@ class TagRuleRelationViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRuleRelation.objects.all()
     serializer_class = TagRuleRelationSerializer
-    pagination_class = MyCursorPagination
     filterset_class = TagRuleRelationFilter
 
 
@@ -228,7 +219,6 @@ class TagRelationViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = TagRelation.objects.all()
     serializer_class = TagRelationSerializer
-    pagination_class = MyCursorPagination
     filterset_class = TagRelationFilter
 
 
@@ -236,5 +226,4 @@ class HouseInfoViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = HouseInfo.objects.all()
     serializer_class = HouseInfoSerializer
-    pagination_class = MyCursorPagination
     filterset_class = HouseInfoFilter

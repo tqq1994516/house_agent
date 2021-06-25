@@ -89,6 +89,7 @@ class TagRelationFilter(filters.FilterSet):
         model = TagRelation
         fields = {
             'id': ['exact'],
+            'customer_name_id': ['exact'],
             'customer_name_id__true_name': ['exact', 'icontains'],
             'tag_id__name': ['exact', 'icontains'],
         }
