@@ -35,6 +35,7 @@ urlpatterns = [
     re_path(r'^login/?$', views.Login.as_view(), name='login'),
     re_path(r'^logout/?$', views.Logout.as_view(), name='logout'),
     re_path(r'^register/?$', views.Register.as_view(), name='register'),
+    re_path(r'^administrativeDivision/?$', views.administrativeDivision.as_view(), name='administrativeDivision'),
     path('admin/', admin.site.urls),
     re_path(r'^captcha/', include('captcha.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

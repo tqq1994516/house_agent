@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from uuid import uuid4
+import requests
 from django.core.cache import cache
 from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
@@ -107,7 +108,8 @@ class Register(APIView):
                     data.save()
                     response = myResponse(data={'message': '注册成功'})
                     return Response(response, status=status.HTTP_200_OK)
-                except Exception:
+                except Exception as e:
+                    print(e)
                     response = myResponse(data={'message': '注册信息表内已存在', 'form': valid_data})
                     return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
@@ -227,3 +229,15 @@ class HouseInfoViewSet(viewsets.ModelViewSet):
     queryset = HouseInfo.objects.all()
     serializer_class = HouseInfoSerializer
     filterset_class = HouseInfoFilter
+
+
+class administrativeDivision(APIView):
+    authentication_classes = []
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        now_year = datetime.now().strftime("%Y")
+        code = 'index'
+        url = '''http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/''' + now_year + '''/''' + code + '''.html'''
+        data = requests.get(url=url)
+        return Response(data.json())

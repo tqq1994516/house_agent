@@ -113,7 +113,7 @@ DATABASES = {
         'NAME': 'house_helper',  # 数据库名，先前创建的
         'USER': 'root',  # 用户名，可以自己创建用户
         'PASSWORD': '123456',  # 密码
-        'HOST': '192.168.32.128',  # mysql服务所在的主机ip
+        'HOST': '192.168.136.128',  # mysql服务所在的主机ip
         'PORT': '3306',  # mysql服务端口
     }
 }
@@ -153,7 +153,7 @@ CACHES = {
         # 连接Redis数据库(服务器地址)
         # 一主带多从(可以配置个Redis，写走第一台，读走其他的机器)
         'LOCATION': [
-            'redis://localhost:6379/0',
+            'redis://192.168.136.128:6379/0',
         ],
         'KEY_PREFIX': 'house_helper',  # 项目名当做文件前缀
         'OPTIONS': {
